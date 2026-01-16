@@ -21,7 +21,6 @@ export function OverlayItem({
   onSelect,
   onPositionChange,
   onSizeChange,
-  onDelete,
 }: OverlayItemProps) {
   const nodeRef = useRef<HTMLDivElement>(null);
 
