@@ -18,17 +18,6 @@ instance/
 .env
 .env.local
 
-# IDE
-.vscode/
-.idea/
-*.swp
-*.swo
-
-# Streams
-streams/
-*.m3u8
-*.ts
-
 # OS
 .DS_Store
 Thumbs.db
