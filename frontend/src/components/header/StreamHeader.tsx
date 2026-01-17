@@ -23,7 +23,7 @@ export function StreamHeader({ streamUrl, onStreamChange, isConnected }: StreamH
   };
 
   const loadLocalStream = () => {
-    const localUrl = 'http://localhost:5000/stream.m3u8';
+    const localUrl = 'http://localhost:3001/stream.m3u8';
     setInputUrl(localUrl);
     onStreamChange(localUrl);
   };

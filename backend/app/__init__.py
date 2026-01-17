@@ -13,9 +13,9 @@ def create_app(config_class=Config):
     app = Flask(__name__)
     app.config.from_object(config_class)
     
-    # Initialize CORS
+    # Initialize CORS - Allow all routes
     CORS(app, resources={
-        r"/api/*": {
+        r"/*": {
             "origins": config_class.CORS_ORIGINS,
             "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
             "allow_headers": ["Content-Type", "Authorization"]

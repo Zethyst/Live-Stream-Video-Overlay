@@ -53,7 +53,7 @@ pip install -r requirements.txt
 4. **Configure environment (optional):**
 Create a `.env` file in the backend directory:
 ```env
-PORT=5000
+PORT=8080
 HOST=0.0.0.0
 MONGO_URI=mongodb://localhost:27017/rtsp_overlay_db
 CORS_ORIGINS=http://localhost:5173
@@ -65,7 +65,7 @@ HLS_OUTPUT_DIR=./streams
 python3 run.py
 ```
 
-The API will be available at `http://localhost:5000`
+The API will be available at `http://localhost:8080`
 
 ### Frontend Setup
 
@@ -82,7 +82,7 @@ npm install
 3. **Configure environment (optional):**
 Create a `.env` file in the frontend directory:
 ```env
-VITE_API_BASE=http://localhost:5000/api
+VITE_API_BASE=http://localhost:8080/api
 ```
 
 4. **Start the development server:**
@@ -94,50 +94,76 @@ The application will be available at `http://localhost:5173`
 
 ## 📡 RTSP Streaming Setup
 
-### Converting RTSP to HLS
+### Integrated Stream Management (Recommended)
 
-Browsers cannot play RTSP streams directly. You need to convert them to HLS format:
+The application now includes **built-in RTSP to HLS conversion** managed through the web interface:
 
-1. **Start the RTSP to HLS converter:**
+1. **Start your Flask backend** (if not already running):
+```bash
+cd backend
+python3 run.py
+```
+
+2. **Open the web application** at `http://localhost:5173`
+
+3. **Use the Stream Manager** (top of the page):
+   - Enter your RTSP URL (e.g., `rtsp://localhost:8554/mystream`)
+   - Click "Start Stream"
+   - The conversion happens automatically in the background
+   - Stream will appear in the video player below
+
+4. **Stream Controls:**
+   - **Start**: Begin RTSP to HLS conversion
+   - **Stop**: Stop the conversion
+   - **Restart**: Restart the current stream
+   - Status indicator shows if stream is running
+
+**Example RTSP URLs:**
+```
+rtsp://localhost:8554/mystream
+rtsp://admin:password@192.168.1.100:554/stream1
+rtsp://camera-ip:port/path
+```
+
+### Manual Conversion (Alternative Method)
+
+You can also manually run the converter script:
+
 ```bash
 cd backend
 python3 rtsp_to_hls.py rtsp://your-camera-ip:554/stream
 ```
 
-**Example RTSP URLs:**
-```bash
-# Local RTSP server
-python3 rtsp_to_hls.py rtsp://localhost:8554/mystream
-
-# IP Camera with authentication
-python3 rtsp_to_hls.py rtsp://admin:password@192.168.1.100:554/stream1
-
-# Generic RTSP stream
-python3 rtsp_to_hls.py rtsp://camera-ip:port/path
-```
-
-2. **In the web app, click "Local Stream"** button or enter:
-```
-http://localhost:5000/stream.m3u8
-```
+Then click "Local Stream" button in the web app.
 
 ### Changing RTSP URL
 
-**Method 1: Using the converter script**
+**Method 1: Using Stream Manager (Easiest)**
+- Stop the current stream
+- Enter new RTSP URL
+- Click "Start Stream"
+
+**Method 2: Using API**
 ```bash
-# Stop the current converter (Ctrl+C)
-# Start with new URL
-python3 rtsp_to_hls.py rtsp://new-camera-url
+# Start stream
+curl -X POST http://localhost:8080/api/stream/start \
+  -H "Content-Type: application/json" \
+  -d '{"rtsp_url": "rtsp://localhost:8554/mystream"}'
+
+# Stop stream
+curl -X POST http://localhost:8080/api/stream/stop
+
+# Check status
+curl http://localhost:8080/api/stream/status
 ```
 
-**Method 2: In the web interface**
-- Enter any HLS URL (`.m3u8`) in the stream URL input
-- Click "Connect" button
-- Use "Demo Stream" for testing without RTSP
+**Method 3: Manual converter script**
+- Stop current converter (Ctrl+C)
+- Start with new URL: `python3 rtsp_to_hls.py rtsp://new-url`
 
 ## 📚 API Documentation
 
-Base URL: `http://localhost:5000/api`
+Base URL: `http://localhost:8080/api`
 
 ### Overlays Endpoints
 
@@ -233,7 +259,72 @@ DELETE /api/overlays/:id
 }
 ```
 
-### Stream Endpoints
+### Stream Management Endpoints
+
+#### Start RTSP Stream
+```http
+POST /api/stream/start
+Content-Type: application/json
+```
+
+**Request:**
+```json
+{
+  "rtsp_url": "rtsp://localhost:8554/mystream"
+}
+```
+
+**Response:**
+```json
+{
+  "status": "success",
+  "message": "Stream started successfully",
+  "rtsp_url": "rtsp://localhost:8554/mystream",
+  "hls_url": "/stream.m3u8"
+}
+```
+
+#### Stop Stream
+```http
+POST /api/stream/stop
+```
+
+**Response:**
+```json
+{
+  "status": "success",
+  "message": "Stream stopped successfully"
+}
+```
+
+#### Get Stream Status
+```http
+GET /api/stream/status
+```
+
+**Response:**
+```json
+{
+  "is_running": true,
+  "rtsp_url": "rtsp://localhost:8554/mystream",
+  "hls_url": "/stream.m3u8"
+}
+```
+
+#### Restart Stream
+```http
+POST /api/stream/restart
+```
+
+**Response:**
+```json
+{
+  "status": "success",
+  "message": "Stream restarted"
+}
+```
+
+### HLS File Serving
 
 #### Get HLS Manifest
 ```http
@@ -365,7 +456,7 @@ GET /health
 ## 🐛 Troubleshooting
 
 ### CORS Errors
-- Ensure Flask backend is running on port 5000
+- Ensure Flask backend is running on port 8080
 - Check CORS_ORIGINS in backend config
 - Verify frontend is accessing correct API URL
 

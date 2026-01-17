@@ -3,6 +3,7 @@ import { StreamHeader } from '@/components/header/StreamHeader';
 import { VideoPlayer } from '@/components/video/VideoPlayer';
 import { OverlayCanvas } from '@/components/overlay/OverlayCanvas';
 import { ControlPanel } from '@/components/control/ControlPanel';
+import { StreamManager } from '@/components/stream/StreamManager';
 import { useOverlays } from '@/hooks/useOverlays';
 import { Toaster } from '@/components/ui/sonner';
 import { Keyboard, Mouse } from 'lucide-react';
@@ -36,14 +37,11 @@ const Index = () => {
   // Keyboard shortcuts
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      console.log('key pressed', e.key);
       if ((e.key === 'Delete' || e.key === 'Backspace') && selectedOverlayId) {
         deleteOverlay(selectedOverlayId);
-        console.log('deleted overlay', selectedOverlayId);
       }
       if (e.key === 'Escape') {
         setSelectedOverlayId(null);
-        console.log('deselected overlay', selectedOverlayId);
       }
     };
 
@@ -67,6 +65,10 @@ const Index = () => {
           style={{ marginRight: isPanelOpen ? '320px' : '0' }}
         >
           <div className="max-w-6xl mx-auto space-y-4">
+            {/* Stream Manager */}
+            <StreamManager onStreamReady={(url) => handleStreamChange(url)} />
+
+            {/* Video Player */}
             <VideoPlayer streamUrl={streamUrl}>
               <OverlayCanvas
                 overlays={overlays}

@@ -3,8 +3,7 @@ import type { Overlay, OverlayPosition, OverlaySize, OverlayFormData, TextOverla
 import { v4 as uuidv4 } from 'uuid';
 import { toast } from 'sonner';
 
-const API_BASE = import.meta.env.VITE_API_BASE;
-console.log('API_BASE', API_BASE);
+const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:3001/api';
 
 // Demo overlays for initial state
 const demoOverlays: Overlay[] = [];
